@@ -5,25 +5,28 @@
     "version": "1.0.0",
     "require": {
         "drupal/coder": "^8.3",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
-        "brainmaestro/composer-git-hooks": "^2.7"
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
     },
     "authors": [
         {
             "name": "Ragnar Kurm",
             "email": "ragnar.kurm@wunder.io"
+        },
+        {
+            "name": "Hannes Kirsman",
+            "email": "hannes.kirsman@wunder.io"
+        },
+        {
+            "name": "Guntis Jakovins",
+            "email": "guntis.jakovins@wunder.io"
+        },
+        {
+            "name": "Lauris Kuznecovs",
+            "email": "lauris.kuznecovs@wunder.io",
+        },
+        {
+            "name": "Marc Galang",
+            "email": "marc.galang@wunder.io"
         }
-    ],
-    "extra": {
-        "hooks": {
-            "pre-commit": [
-                "echo make-hannes-happy"
-            ]
-        }
-    },
-    "scripts": {
-        "cghooks": "vendor/bin/cghooks",
-        "post-install-cmd": "vendor/bin/cghooks add --force --ignore-lock",
-        "post-update-cmd": "vendor/bin/cghooks add --force --ignore-lock"
-    }
+    ]
 }
