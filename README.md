@@ -2,6 +2,8 @@
 
 This composer package will provide some basic code quality checks before commiting code.
 
+It checks only modified files or new files.
+
 ## Checks performed
 
 This repository currently has following checks:
