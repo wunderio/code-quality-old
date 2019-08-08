@@ -17,7 +17,7 @@ if [ ! -f "$src" ]; then
 fi
 
 dst=.git/hooks/pre-commit
-if [ ! -L "$dst" -o ! -f "$dst" ]; then
+if [ ! -f "$dst" ]; then
   rm -fv "$dst"
   ln -sv "../../$src" "$dst"
 fi
