@@ -1,3 +1,265 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "just testing"
+set -e
+set -u
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+DEFAULT_COLOR='\033[0;0m'
+
+function section {
+  local msg="$1"
+  echo -e "\x1B[0;1;44m  $msg  \x1B[0m"
+}
+
+function success {
+  local msg="$1"
+  echo -e "\x1B[0;1;42m  $msg  \x1B[0m"
+}
+
+function error {
+  echo -e "$RED"
+  cat
+  echo -e "$DEFAULT_COLOR"
+  exit 1
+}
+
+function tmpfile_cleanup_at_exit {
+  trap "{ rm -f /tmp/pre-commit.*; }" EXIT
+}
+
+function tmpfile {
+  mktemp /tmp/pre-commit.XXXXXX
+}
+
+function acquire_files {
+
+  local files=$(tmpfile)
+
+  # if we have 0 command line args
+  # then check staged stuff in git
+  # else use command line args as files to check
+  if [ "$#" -eq 0 ]; then
+    # TODO: give warning or error in presence of MM.
+    # We cannot check MM,
+    # because we would check updated version
+    # not the staged version.
+    # using bash for checking file types
+    # because mac's find and xargs are castrated.
+    git status -s --porcelain \
+    | grep -E '^(M |A ) ' \
+    | sed -e 's/^ *[^ ]* *//' \
+    | grep -vE '/features/.*\.inc$' \
+    | bash -c 'while read f; do test -f "$f" && echo "$f" ; done' \
+    > "$files"
+  else
+    local file
+    for file in "$@"
+    do
+      echo "$file" >> "$files"
+    done
+  fi
+
+  echo -n "$files"
+}
+
+function acquire_files_mime {
+
+  local files="$1"
+  local mime="$2"
+  local files_filtered=$(tmpfile)
+
+  file --mime-type -f "$files" \
+  | grep -E ':\s*'"$mime"'$' \
+  | sed -e 's/:.*//' \
+  > "$files_filtered"
+
+  echo -n "$files_filtered"
+}
+
+function files_ensure {
+
+  local files="$1"
+
+  local count=$(wc -l < "$files" | tr -d '[:space:]')
+  if [ "$count" -lt 1 ]; then
+    error <<ERR
+Zero modified and staged files found.
+There may be other kind of modifications staged.
+Some files may be excluded from analysis.
+Or no arguments provided to stand-alone excution.
+Try 'git add ...'.
+Try '$0 file_to_check1.php file_to_check2.txt ...'.
+
+If you dont have file additions or modifications,
+use "git commit --no-verify -m '...'" instead.
+ERR
+  fi
+}
+
+function phpcs_update {
+  # Always get the latest PHP Code Sniffer image.
+  echo "===> Updating phpcs ..."
+  docker pull hkirsman/wunder-phpcs
+}
+
+# Update 'Common Repository' repo.
+# We expect to have a common repo application repo root???
+function common_update {
+
+  local repo=drupal-deployment-common
+
+  if [ ! -d "$repo" ]; then
+    error <<ERR
+No $repo found.
+Use "git clone ssh://git@bitbucket.trimble.tools/spde/drupal-deployment-common.git $(pwd)/$repo".
+ERR
+  fi
+
+  (
+    cd "$repo"
+    echo "===> Updating $repo ..."
+    git pull
+  )
+}
+
+function check_drupal_coding_standards {
+
+  local files="$1"
+
+  section "Checking Drupal coding standards..."
+  phpcs_log=$(tmpfile)
+  if \
+    cat "$files" \
+    | xargs \
+      docker \
+        run \
+        --rm \
+        --volume $(pwd)/:/app/:cached \
+        hkirsman/wunder-phpcs phpcs >"$phpcs_log" 2>&1
+  then
+    cat "$phpcs_log"
+    return
+  fi
+
+  cat "$phpcs_log"
+
+  # Fix the violations automatically if possible.
+  if cat "$phpcs_log" | grep -s 'PHPCBF CAN FIX'; then
+    # Allows us to read user input below, assigns stdin to keyboard
+    exec < /dev/tty
+
+    read -p "$(echo -e "\n${GREEN}Fix these violations automatically? (y/n)${DEFAULT_COLOR} ")" yn
+    if [ "$yn" = "y" ]; then
+      set +e
+      cat "$files" \
+      | xargs \
+        docker \
+          run \
+          --rm \
+          --volume $(pwd)/:/app/:cached \
+          hkirsman/wunder-phpcs phpcbf
+      set -e
+      error << ERR
+Check the changes (there might be for example empty comments),
+add the updated files to GIT and try again.
+ERR
+    fi
+  fi
+
+  error << ERR
+Above violations need to be fixed manually.
+ERR
+}
+
+function check_php_compatibility_and_version {
+
+  local files="$1"
+
+  section "Checking PHPCompatibility and v7.1..."
+  cat "$files" \
+  | xargs \
+    docker \
+      run \
+      --rm \
+      --volume $(pwd)/:/app/:cached \
+      hkirsman/wunder-phpcs phpcs \
+        --standard=PHPCompatibility \
+        --extensions=php,inc,module,install \
+        --runtime-set testVersion 7.1
+}
+
+function check_php_syntax {
+
+  local files="$1"
+
+  section "Checking PHP syntax errors..."
+  cat "$files" \
+  | xargs \
+    -L 1 \
+    php -l
+}
+
+
+function check_perms {
+  local perms_expect="$1"
+  local file="$2"
+
+  case "$(uname -s)" in
+    Darwin*) # mac
+      stat_flags='-f %p'
+      perms_expect="100$perms_expect"
+      ;;
+    Linux*|*) # linux or the rest
+      stat_flags='-c %a'
+      ;;
+  esac
+
+  perms_current="$(stat $stat_flags "$file")"
+  if [ "$perms_current" != "$perms_expect" ]; then
+    error << ERR
+File: $file
+Current permissions:  $perms_current
+Expected permissions: $perms_expect
+ERR
+  fi
+}
+
+function check_sh_perms {
+
+  local files="$1"
+
+  section "Checking Shell script permissions..."
+  local file
+  cat "$files" \
+  | while read file
+  do
+    check_perms 755 "$file"
+  done
+}
+
+function main {
+  cd $(git rev-parse --show-toplevel)
+  tmpfile_cleanup_at_exit
+  phpcs_update
+  common_update
+
+  files=$(acquire_files "$@")
+  files_ensure "$files"
+
+  check_drupal_coding_standards "$files"
+
+  files_php=$(acquire_files_mime "$files" 'text/x-php')
+  check_php_compatibility_and_version "$files_php"
+  check_php_syntax "$files_php"
+
+  files_sh=$(acquire_files_mime "$files" 'text/x-shellscript')
+  check_sh_perms "$files_sh"
+
+  echo
+  success "Success"
+  sleep 1
+}
+
+main "$@"
