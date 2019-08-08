@@ -13,6 +13,11 @@ This repository currently has following checks:
 * PHP syntax
 * Shell script exec bits
 
+## Pre-requisites
+
+* Docker
+* Composer
+
 ## Installation
 
 This needs to be done only once either while creating a project or enabling code checks in existing project.

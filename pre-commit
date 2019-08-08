@@ -104,26 +104,6 @@ function phpcs_update {
   docker pull hkirsman/wunder-phpcs
 }
 
-# Update 'Common Repository' repo.
-# We expect to have a common repo application repo root???
-function common_update {
-
-  local repo=drupal-deployment-common
-
-  if [ ! -d "$repo" ]; then
-    error <<ERR
-No $repo found.
-Use "git clone ssh://git@bitbucket.trimble.tools/spde/drupal-deployment-common.git $(pwd)/$repo".
-ERR
-  fi
-
-  (
-    cd "$repo"
-    echo "===> Updating $repo ..."
-    git pull
-  )
-}
-
 function check_drupal_coding_standards {
 
   local files="$1"
@@ -243,7 +223,6 @@ function main {
   cd $(git rev-parse --show-toplevel)
   tmpfile_cleanup_at_exit
   phpcs_update
-  common_update
 
   files=$(acquire_files "$@")
   files_ensure "$files"
