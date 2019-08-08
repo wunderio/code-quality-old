@@ -2,6 +2,7 @@
     "name": "wunderio/code-quality",
     "description": "Code Quality checker, as git pre-commit",
     "type": "project",
+    "version": "1.0.0",
     "require": {
         "drupal/coder": "^8.3",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
@@ -16,8 +17,13 @@
     "extra": {
         "hooks": {
             "pre-commit": [
-                "echo test"
+                "echo make-hannes-happy"
             ]
         }
+    },
+    "scripts": {
+        "cghooks": "vendor/bin/cghooks",
+        "post-install-cmd": "vendor/bin/cghooks add --force --ignore-lock",
+        "post-update-cmd": "vendor/bin/cghooks add --force --ignore-lock"
     }
 }
