@@ -1,18 +1,33 @@
-# code-quality
+# Code Quality
+
+This composer package will provide some basic code quality checks before commiting code.
+
+## Checks performed
+
+This repository currently has following checks:
+
+* PHP Drupal Coding Standards
+* PHP 7.1 Compatibility
+* PHP syntax
+* Shell script exec bits
+
+## Installation
+
+This needs to be done only once either while creating a project or enabling code checks in existing project.
 
 Include following things into your project to include `code-quality`:
 
 ```
 {
-    "require": {
-        "wunderio/code-quality": "master"
-    },
     "minimum-stability": "dev",
     "repositories": {
         "code-quality": {
             "type": "vcs",
             "url": "git@github.com:wunderio/code-quality.git"
         }
+    },
+    "require": {
+        "wunderio/code-quality": "dev-master"
     },
     "scripts": {
       "post-install-cmd": [
@@ -24,5 +39,7 @@ Include following things into your project to include `code-quality`:
     }
 }
 ```
+
+Running `composer install` will bring in new package and ensures git pre-commit hook by executing install-update.sh.
 
 In future we will have it as regular composer package for easier installation.
