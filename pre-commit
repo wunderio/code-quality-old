@@ -8,6 +8,8 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 DEFAULT_COLOR='\033[0;0m'
 
+phpcs_default_arguments='--colors -p --report-width=120 --standard=vendor/wunderio/code-quality/phpcs.xml'
+
 function section {
   local msg="$1"
   echo -e "\x1B[0;1;44m  $msg  \x1B[0m"
@@ -98,12 +100,6 @@ ERR
   fi
 }
 
-function phpcs_update {
-  # Always get the latest PHP Code Sniffer image.
-  echo "===> Updating phpcs ..."
-  docker pull hkirsman/wunder-phpcs
-}
-
 function check_drupal_coding_standards {
 
   local files="$1"
@@ -111,13 +107,7 @@ function check_drupal_coding_standards {
   section "Checking Drupal coding standards..."
   phpcs_log=$(tmpfile)
   if \
-    cat "$files" \
-    | xargs \
-      docker \
-        run \
-        --rm \
-        --volume $(pwd)/:/app/:cached \
-        hkirsman/wunder-phpcs phpcs >"$phpcs_log" 2>&1
+    cat "$files" | xargs vendor/bin/phpcs $phpcs_default_arguments > "$phpcs_log" 2>&1
   then
     cat "$phpcs_log"
     return
@@ -133,13 +123,7 @@ function check_drupal_coding_standards {
     read -p "$(echo -e "\n${GREEN}Fix these violations automatically? (y/n)${DEFAULT_COLOR} ")" yn
     if [ "$yn" = "y" ]; then
       set +e
-      cat "$files" \
-      | xargs \
-        docker \
-          run \
-          --rm \
-          --volume $(pwd)/:/app/:cached \
-          hkirsman/wunder-phpcs phpcbf
+      cat "$files" | xargs vendor/bin/phpcbf $phpcs_default_arguments
       set -e
       error << ERR
 Check the changes (there might be for example empty comments),
@@ -157,17 +141,11 @@ function check_php_compatibility_and_version {
 
   local files="$1"
 
-  section "Checking PHPCompatibility and v7.1..."
-  cat "$files" \
-  | xargs \
-    docker \
-      run \
-      --rm \
-      --volume $(pwd)/:/app/:cached \
-      hkirsman/wunder-phpcs phpcs \
-        --standard=PHPCompatibility \
-        --extensions=php,inc,module,install \
-        --runtime-set testVersion 7.1
+  #section "Checking PHPCompatibility and v7.1..."
+  #./vendor/bin/phpcs \
+  #  --standard=PHPCompatibility \
+  #  --extensions=php,inc,module,install \
+  #  --runtime-set testVersion 7.1
 }
 
 function check_php_syntax {
@@ -222,7 +200,6 @@ function check_sh_perms {
 function main {
   cd $(git rev-parse --show-toplevel)
   tmpfile_cleanup_at_exit
-  phpcs_update
 
   files=$(acquire_files "$@")
   files_ensure "$files"
