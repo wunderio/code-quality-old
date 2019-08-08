@@ -1,22 +1,23 @@
 {
-    "name": "ourcodeworld/hello-composer",
-    "description": "My first packagist package",
-    "type": "package",
+    "name": "wunderio/code-quality",
+    "description": "Code Quality checker, as git pre-commit",
+    "type": "project",
     "require": {
-        "php": ">=5.3.0"
+        "drupal/coder": "^8.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+        "brainmaestro/composer-git-hooks": "^2.7"
     },
-    "license": "mit",
     "authors": [
         {
-            "name": "Your Name",
-            "email": "your@email.com",
-            "homepage": "http://yourhomepage-if-you-have.com"
+            "name": "Ragnar Kurm",
+            "email": "ragnar.kurm@wunder.io"
         }
     ],
-    "minimum-stability": "dev",
-    "autoload": {
-        "psr-4": {
-            "ourcodeworld\\HelloComposer\\": "src/"
+    "extra": {
+        "hooks": {
+            "pre-commit": [
+                "echo test"
+            ]
         }
     }
 }
