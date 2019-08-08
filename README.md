@@ -13,6 +13,14 @@ Include following things into your project to include `code-quality`:
             "type": "vcs",
             "url": "git@github.com:wunderio/code-quality.git"
         }
+    },
+    "scripts": {
+      "post-install-cmd": [
+        "./vendor/wunderio/code-quality/install-update.sh"
+      ],
+      "post-update-cmd": [
+        "./vendor/wunderio/code-quality/install-update.sh"
+      ]
     }
 }
 ```
