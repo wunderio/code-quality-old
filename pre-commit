@@ -141,11 +141,11 @@ function check_php_compatibility_and_version {
 
   local files="$1"
 
-  #section "Checking PHPCompatibility and v7.1..."
-  #./vendor/bin/phpcs \
-  #  --standard=PHPCompatibility \
-  #  --extensions=php,inc,module,install \
-  #  --runtime-set testVersion 7.1
+  section "Checking PHPCompatibility and v7.1..."
+  cat "$files" | xargs vendor/bin/phpcs \
+    --standard=PHPCompatibility \
+    --extensions=php,inc,module,install \
+    --runtime-set testVersion 7.1
 }
 
 function check_php_syntax {
