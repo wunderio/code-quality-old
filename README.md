@@ -51,3 +51,8 @@ Include following things into your project to include `code-quality`:
 Running `composer install` will bring in new package and ensures git pre-commit hook by executing install-update.sh.
 
 In future we will have it as regular composer package for easier installation.
+
+### Custom PHP CodeSniffer rules
+
+If you need to customize the rules for PHP CodeSniffer then drop in phpcs.xml in the same
+folder as composer.json.
