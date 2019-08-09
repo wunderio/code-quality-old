@@ -12,6 +12,7 @@ This repository currently has following checks:
 * PHP 7.1 Compatibility
 * PHP syntax
 * Shell script exec bits
+* PHP Code security
 
 ## Pre-requisites
 
