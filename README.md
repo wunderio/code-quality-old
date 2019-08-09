@@ -16,7 +16,6 @@ This repository currently has following checks:
 
 ## Pre-requisites
 
-* Docker
 * Composer
 
 ## Installation
