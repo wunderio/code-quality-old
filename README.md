@@ -50,7 +50,7 @@ This needs to be done only once either while creating a project or enabling code
 
 When a developer pulls a project containing code-quality:
 
-1. Running `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
+1. Running `composer update` or `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
 
 ## Usage
 
