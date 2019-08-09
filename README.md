@@ -51,3 +51,11 @@ Include following things into your project to include `code-quality`:
 Running `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
 
 In future we will have it as regular composer package for easier installation.
+
+## Usage
+
+The pre-commit hook will be automatically run upon executing `git commit`.
+
+The code scanning can be avoided by `git commit --no-verify`.
+
+Files can be scanned individually: `pre-commit myfile.php`.
