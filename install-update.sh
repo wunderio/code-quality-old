@@ -1,28 +1,27 @@
 #!/bin/sh
 
-if [ ! -d '.git' ] && [ ! -d '../.git' ]; then
+inside_git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+
+if [ ! "$inside_git_repo" ]; then
   echo "Error: No git repo!"
   exit 0
 fi
 
-if [ ! -d '.git/hooks' ] && [ ! -d '../.git/hooks' ]; then
+if [ ! -d "$(git rev-parse --show-toplevel)/.git/hooks" ] ; then
   echo "Error: No hooks in git repo!"
   exit 0
 fi
 
-src=vendor/wunderio/code-quality/pre-commit
+src="$(pwd)/vendor/wunderio/code-quality/pre-commit"
 if [ ! -f "$src" ]; then
   echo "Error: missing $src"
   exit 0
 fi
 
 
-dst=.git/hooks/pre-commit
-if [ -d '../.git' ]; then
-  dst=../.git/hooks/pre-commit
-fi
+dst="$(git rev-parse --show-toplevel)/.git/hooks/pre-commit"
 
 if [ ! -f "$dst" ]; then
   rm -fv "$dst"
-  cp "$src" "$dst"
+  ln -sv "$src" "$dst"
 fi
