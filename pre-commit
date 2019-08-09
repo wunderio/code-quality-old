@@ -8,7 +8,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 DEFAULT_COLOR='\033[0;0m'
 
-phpcs_default_arguments='--colors -p --report-width=120 --standard=vendor/wunderio/code-quality/phpcs.xml'
+phpcs_default_arguments='--colors -p --report-width=120 --standard=vendor/wunderio/code-quality/phpcs.xml,vendor/wunderio/code-quality/phpcs-security.xml'
 
 function section {
   local msg="$1"
