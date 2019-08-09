@@ -34,7 +34,7 @@ Include following things into your project to include `code-quality`:
             "url": "git@github.com:wunderio/code-quality.git"
         }
     },
-    "require": {
+    "require-dev": {
         "wunderio/code-quality": "dev-master"
     },
     "scripts": {
