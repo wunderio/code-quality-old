@@ -14,7 +14,14 @@ if [ ! -d './vendor' ] && [ -d 'drupal/vendor' ]; then
   vendor_dir="drupal/vendor/"
 fi
 
-phpcs_default_arguments="--colors -p --report-width=120 --standard=$vendor_dir/wunderio/code-quality/phpcs.xml,$vendor_dir/wunderio/code-quality/phpcs-security.xml"
+# Load the phpcs.xml path from project root if it exists and if not then load the default.
+if [ -f phpcs.xml ]; then
+    phpcs_path='phpcs.xml'
+else
+    phpcs_path="$vendor_dir/wunderio/code-quality/phpcs.xml"
+fi
+
+phpcs_default_arguments="--colors -p --report-width=120 --standard=$phpcs_path,$vendor_dir/wunderio/code-quality/phpcs-security.xml"
 
 function section {
   local msg="$1"

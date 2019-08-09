@@ -52,6 +52,11 @@ When a developer pulls a project containing code-quality:
 
 1. Running `composer update` or `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
 
+## Custom PHP CodeSniffer rules
+
+If you need to customize the rules for PHP CodeSniffer then drop in phpcs.xml in the same
+folder as composer.json.
+
 ## Usage
 
 The pre-commit hook will be automatically run upon executing `git commit`.
