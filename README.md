@@ -22,20 +22,19 @@ This repository currently has following checks:
 
 This needs to be done only once either while creating a project or enabling code checks in existing project.
 
-Include following things into your project to include `code-quality`:
+1. Include following into `composer.json`:
 
 ```
 {
-    "minimum-stability": "dev",
-    "repositories": {
-        "code-quality": {
-            "type": "vcs",
-            "url": "git@github.com:wunderio/code-quality.git"
-        }
-    },
-    "require-dev": {
-        "wunderio/code-quality": "dev-master"
-    },
+    "minimum-stability": "dev"
+}
+```
+
+2. `composer require wunderio/code-quality`
+
+3. Link maintenance script in `composer.json`:
+```
+{
     "scripts": {
       "post-install-cmd": [
         "./vendor/wunderio/code-quality/install-update.sh"
@@ -47,9 +46,11 @@ Include following things into your project to include `code-quality`:
 }
 ```
 
-Running `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
+4. `composer update` or `composer install`
 
-In future we will have it as regular composer package for easier installation.
+When a developer pulls a project containing code-quality:
+
+1. Running `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
 
 ## Usage
 
