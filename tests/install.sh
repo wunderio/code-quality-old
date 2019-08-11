@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script performs code quality checker,
+# installing not yet committed code.
+
 set -x
 set -e
 set -u
