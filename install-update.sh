@@ -5,7 +5,9 @@ set -u
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 
 relpath() {
-  python -c 'import os.path, sys; print os.path.relpath(sys.argv[1],sys.argv[2])' "$1" "$2"
+  local file="$1"
+  local dir="$2"
+  python -c 'import os.path, sys; print os.path.relpath(sys.argv[1],sys.argv[2])' "$file" "$dir"
 }
 
 inside_git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
@@ -23,7 +25,10 @@ if [ ! -d "$hooks" ] ; then
   exit 0
 fi
 
-source="$(pwd)/vendor/wunderio/code-quality/pre-commit"
+# Using 'pwd -P' to get fully resolved path.
+# Because git is doing the same.
+# Otherwise cannot compute relative link properly.
+source="$(pwd -P)/vendor/wunderio/code-quality/pre-commit"
 # Check if the actual hook script is there.
 if [ ! -f "$source" ]; then
   echo "Error: missing $source"
@@ -31,7 +36,7 @@ if [ ! -f "$source" ]; then
 fi
 
 target="$hooks/pre-commit"
-source_rel=$(relpath "$source" "$target")
+source_rel=$(relpath "$source" "$hooks")
 # If correct link exists, dont mess with it.
 if [ -L "$target" ]; then
   source_existing=$(readlink "$target")
