@@ -84,7 +84,13 @@ ls -la \
 test -f "$git_dir/.git/hooks/pre-commit"
 
 cd "$git_dir"
+
 test_file="test"
 touch "$test_file"
 git add "$test_file"
-git commit
+git commit -m 'xxx'
+
+echo "asdfasdf" > "$test_file"
+cp "$package_dir/phpcs.xml" "$git_dir/phpcs.xml"
+git add "$test_file"
+git commit -m 'xxx'

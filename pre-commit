@@ -8,20 +8,26 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 DEFAULT_COLOR='\033[0;0m'
 
-vendor_dir="vendor/"
+git_dir=$(git rev-parse --show-toplevel)
 
-if [ ! -d './vendor' ] && [ -d 'drupal/vendor' ]; then
-  vendor_dir="drupal/vendor/"
-fi
+package_dir=$(readlink "$git_dir/.git/hooks/pre-commit")
+package_dir=$(dirname "$package_dir")
+# Don't use 'pwd -P' because during testing it would lead to development repo.
+# Because the package is linked into test dir by composer, not copied.
+package_dir=$(cd "$git_dir/.git/hooks/$package_dir"; pwd)
+
+vendor_dir=$(cd "$package_dir/../.." ; pwd -P)
+
+# Prepend our vendor bin to override any other vendor bins.
+export PATH="$vendor_dir/bin:$PATH"
 
 # Load the phpcs.xml path from project root if it exists and if not then load the default.
-if [ -f phpcs.xml ]; then
-    phpcs_path='phpcs.xml'
-else
-    phpcs_path="$vendor_dir/wunderio/code-quality/phpcs.xml"
+phpcs_path="$package_dir/phpcs.xml"
+if [ -f "$git_dir/phpcs.xml" ]; then
+    phpcs_path="$git_dir/phpcs.xml"
 fi
 
-phpcs_default_arguments="--colors -p --report-width=120 --standard=$phpcs_path,$vendor_dir/wunderio/code-quality/phpcs-security.xml"
+phpcs_default_arguments="--colors -p --report-width=120 --standard=$phpcs_path,$package_dir/phpcs-security.xml"
 
 function section {
   local msg="$1"
@@ -120,7 +126,7 @@ function check_drupal_coding_standards {
   section "Checking Drupal coding standards..."
   phpcs_log=$(tmpfile)
   if \
-    cat "$files" | xargs "$vendor_dir"/bin/phpcs $phpcs_default_arguments > "$phpcs_log" 2>&1
+    cat "$files" | xargs phpcs $phpcs_default_arguments > "$phpcs_log" 2>&1
   then
     cat "$phpcs_log"
     return
@@ -136,7 +142,7 @@ function check_drupal_coding_standards {
     read -p "$(echo -e "\n${GREEN}Fix these violations automatically? (y/n)${DEFAULT_COLOR} ")" yn
     if [ "$yn" = "y" ]; then
       set +e
-      cat "$files" | xargs "$vendor_dir"/bin/phpcbf $phpcs_default_arguments
+      cat "$files" | xargs phpcbf $phpcs_default_arguments
       set -e
       error << ERR
 Check the changes (there might be for example empty comments),
@@ -155,7 +161,7 @@ function check_php_compatibility_and_version {
   local files="$1"
 
   section "Checking PHPCompatibility and v7.1..."
-  cat "$files" | xargs "$vendor_dir"/bin/phpcs \
+  cat "$files" | xargs phpcs \
     --standard=PHPCompatibility \
     --extensions=php,inc,module,install \
     --runtime-set testVersion 7.1
