@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # This script performs code quality checker.
+# The package under development is installed into test by linking.
 
 set -x
 set -e
@@ -40,6 +41,7 @@ fi
 git_dir=$(mktemp -d /tmp/code-quality-test-install.$$.XXXXXX)
 
 package_dir=$(dirname "${BASH_SOURCE[0]}")/..
+package_dir=$(cd "$package_dir" ; pwd -P)
 
 if [ -z "$composer_dir" ]; then
   composer_dir="$git_dir"
@@ -58,8 +60,8 @@ composer init \
   --author='Ragnar Kurm <ragnar.kurm@wunder.io>' \
   --stability=dev \
   --type=project \
-  --repository='{ "type": "vcs", "url": "git@github.com:wunderio/code-quality.git" }' \
-  --require-dev='wunderio/code-quality:dev-master' \
+  --repository="{ \"type\": \"path\", \"url\": \"$package_dir\" }" \
+  --require-dev='wunderio/code-quality @dev' \
 
 composer_json="$composer_dir/composer.json"
 composer_json_tmp="$composer_dir/composer.json.tmp"
@@ -80,3 +82,9 @@ ls -la \
   "$composer_dir/vendor/wunderio/code-quality"
 
 test -f "$git_dir/.git/hooks/pre-commit"
+
+cd "$git_dir"
+test_file="test"
+touch "$test_file"
+git add "$test_file"
+git commit
