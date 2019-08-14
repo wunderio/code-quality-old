@@ -1,66 +1,50 @@
 # Code Quality
 
-This composer package will provide some basic code quality checks before commiting code.
+This composer package will provide some basic code quality checks before committing code.
 
-It checks only modified files or new files.
+It checks ONLY git staged.
 
 ## Checks performed
 
-This repository currently has following checks:
+This repository currently has following checks
 
-* PHP Drupal Coding Standards
-* PHP 7.1 Compatibility
-* PHP syntax
-* Shell script exec bits
-* PHP Code security
+- [ESLint](https://eslint.org/) validator
 
 ## Pre-requisites
 
-* Composer
+- Node.js
+- Npm or Yarn
 
 ## Installation
 
-This needs to be done only once either while creating a project or enabling code checks in existing project.
+### Existing project
+- Copy dot files over your project or make your own. Just make sure **eslint** is installed.
 
-1. Include following into `composer.json`:
+- Add these lines to your **package.json**
 
 ```
-{
-    "minimum-stability": "dev"
-}
-```
-
-2. `composer require wunderio/code-quality`
-
-3. Link maintenance script in `composer.json`:
-```
-{
-    "scripts": {
-      "post-install-cmd": [
-        "./vendor/wunderio/code-quality/install-update.sh"
-      ],
-      "post-update-cmd": [
-        "./vendor/wunderio/code-quality/install-update.sh"
-      ]
+"husky": {
+    "hooks": {
+        "pre-commit": "lint-staged"
     }
+},
+"lint-staged": {
+    "*.{js}": [
+        "eslint"
+    ]
 }
 ```
 
-4. `composer update` or `composer install`
+- Install required packages:
+```
+npm install --save-dev lint-staged husky
+```
 
-When a developer pulls a project containing code-quality:
+- Now all should be ready, go ahead and test it:
+```
+git add ./src/demo.js
+git commit
+```
 
-1. Running `composer update` or `composer install` will bring in new package and ensures git pre-commit hook by executing `install-update.sh`.
-
-## Custom PHP CodeSniffer rules
-
-If you need to customize the rules for PHP CodeSniffer then drop in phpcs.xml in the same
-folder as composer.json.
-
-## Usage
-
-The pre-commit hook will be automatically run upon executing `git commit`.
-
-The code scanning can be avoided by `git commit --no-verify`.
-
-Files can be scanned individually: `pre-commit myfile.php`.
+### New project
+@todo
