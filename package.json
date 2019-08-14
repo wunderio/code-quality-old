@@ -1,7 +1,10 @@
 {
   "name": "ESLint",
   "description": "",
-  "scripts": {},
+  "scripts": {
+    "lint:js": "eslint",
+    "lint:js:fix": "eslint --fix"
+  },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.2",
